@@ -1,53 +1,256 @@
-# 🛡️ RoadSentinel - Hệ Thống Giám Sát Hành Vi Tài Xế & Quản Lý Đội Xe
+# Mobile - Flutter Driver App
 
-Hệ thống IoT/AI tích hợp giúp doanh nghiệp vận tải giám sát an toàn tài xế theo thời gian thực, tự động chấm công và quản lý hiệu suất dựa trên hành vi lái xe.
+## 📁 Cấu Trúc Thư Mục
 
-## 🏗️ Kiến Trúc Hệ Thống
+```
+Mobile/
+├── lib/
+│   ├── main.dart                # Entry point
+│   │
+│   ├── screens/                 # UI Screens
+│   │   ├── home/
+│   │   │   ├── home_screen.dart
+│   │   │   └── widgets/
+│   │   │       ├── safety_score_card.dart
+│   │   │       └── trip_info_card.dart
+│   │   │
+│   │   ├── attendance/
+│   │   │   ├── check_in_screen.dart
+│   │   │   ├── check_out_screen.dart
+│   │   │   └── attendance_history.dart
+│   │   │
+│   │   ├── violations/
+│   │   │   ├── violation_list_screen.dart
+│   │   │   ├── violation_detail_screen.dart
+│   │   │   └── appeal_form_screen.dart
+│   │   │
+│   │   ├── payroll/
+│   │   │   ├── salary_screen.dart
+│   │   │   └── salary_detail_screen.dart
+│   │   │
+│   │   └── profile/
+│   │       ├── profile_screen.dart
+│   │       └── settings_screen.dart
+│   │
+│   ├── widgets/                 # Reusable widgets
+│   │   ├── custom_button.dart
+│   │   ├── custom_card.dart
+│   │   ├── alert_dialog.dart
+│   │   └── loading_indicator.dart
+│   │
+│   ├── services/                # Services layer
+│   │   ├── api_service.dart    # HTTP API calls
+│   │   ├── auth_service.dart
+│   │   ├── violation_service.dart
+│   │   ├── payroll_service.dart
+│   │   ├── websocket_service.dart  # WebSocket connection
+│   │   ├── notification_service.dart  # FCM handler
+│   │   ├── location_service.dart   # GPS tracking
+│   │   └── vibration_service.dart  # Rung cảnh báo
+│   │
+│   ├── models/                  # Data models
+│   │   ├── user.dart
+│   │   ├── driver.dart
+│   │   ├── violation.dart
+│   │   ├── attendance.dart
+│   │   ├── salary.dart
+│   │   └── alert.dart
+│   │
+│   ├── providers/               # State management (Provider/Riverpod)
+│   │   ├── auth_provider.dart
+│   │   ├── driver_provider.dart
+│   │   ├── violation_provider.dart
+│   │   └── alert_provider.dart
+│   │
+│   ├── utils/                   # Utilities
+│   │   ├── constants.dart
+│   │   ├── validators.dart
+│   │   ├── date_formatter.dart
+│   │   └── theme.dart
+│   │
+│   └── config/                  # Configuration
+│       ├── app_config.dart
+│       └── routes.dart
+│
+├── assets/                      # Static assets
+│   ├── images/
+│   │   └── logo.png
+│   └── sounds/
+│       └── alert_sound.mp3     # Âm thanh cảnh báo
+│
+├── android/                     # Android config
+│   └── app/
+│       └── google-services.json # FCM config
+│
+├── ios/                         # iOS config
+│   └── Runner/
+│       └── GoogleService-Info.plist
+│
+├── pubspec.yaml                 # Flutter dependencies
+├── .env                         # Environment variables
+└── README.md
+```
 
-Hệ thống hoạt động theo mô hình: **Edge AI (Camera) → Backend (Django) → Clients (Web Admin & Mobile App)**.
+## 🎯 Tính Năng Chính
 
-### 1. ⚙️ Backend (Django REST Framework)
-*Đóng vai trò là trung tâm xử lý dữ liệu và logic nghiệp vụ.*
+### 1. 🚨 Alert System (Nhận Cảnh Báo)
+- **FCM Push Notification:** Nhận thông báo từ Backend khi có vi phạm
+- **Rung mạnh:** Sử dụng Vibration plugin
+- **Phát âm thanh cảnh báo:** Audio player (audioplayers package)
+- **Alert Dialog:** Hiển thị popup đỏ toàn màn hình
 
-* **API Gateway:** Tiếp nhận dữ liệu JSON (sự kiện vi phạm) và hình ảnh bằng chứng (Snapshot) từ **Camera AI** và dữ liệu cảm biến/GPS từ **Arduino**.
-* **Real-time Socket (Django Channels):** Đẩy cảnh báo tức thì (Alert) từ thiết bị phần cứng tới Web Admin và Mobile App với độ trễ thấp.
-* **Logic Nghiệp vụ:**
-    * Xử lý chấm công tự động (kết hợp FaceID từ Camera và GPS).
-    * Tính điểm an toàn tài xế (Driver Scoring) và tính lương thưởng/phạt tự động.
-* **Quản trị dữ liệu:** Lưu trữ lịch sử hành trình, log vi phạm và bằng chứng media.
+### 2. 🕐 Chấm Công (Attendance)
+- **Check-in/Check-out:** GPS verification
+- **Face Recognition (Optional):** Camera tích hợp
+- **Lịch sử chấm công:** Xem ca làm việc
 
-### 2. 🖥️ Frontend (ReactJS)
-*Dành cho Quản lý / Nhà xe (Web Dashboard).*
+### 3. 💰 Lương & Vi Phạm
+- **Bảng lương real-time:** Hiển thị thu nhập tạm tính
+- **Lịch sử vi phạm:** Xem ảnh bằng chứng
+- **Gửi khiếu nại:** Form appeal nếu bị phạt sai
 
-* **Trung tâm Giám sát (Command Center):**
-    * Hiển thị bản đồ GPS thời gian thực của toàn bộ đội xe.
-    * **Live Alert Pop-up:** Hiển thị cảnh báo đỏ ngay lập tức khi tài xế ngủ gật/mất tập trung kèm âm thanh và hình ảnh.
-* **Quản lý sự cố (Incident Management):** Xem lại, xác nhận (approve) hoặc hủy bỏ (reject) các lỗi do AI bắt được để làm cơ sở phạt.
-* **Báo cáo & Thống kê:** Biểu đồ hiệu suất đội xe, bảng công, xuất báo cáo lương hàng tháng.
+### 4. 📍 GPS Tracking (Background)
+- Gửi vị trí lên Server mỗi 30 giây (khi đang làm việc)
 
-### 3. 📱 Mobile App (React Native / Flutter)
-*Dành cho Tài xế (Driver Companion).*
+## 🛠️ Tech Stack & Packages
 
-* **Thiết bị nhận cảnh báo (Receiver):** Rung mạnh và phát âm thanh cảnh báo khi nhận tín hiệu "Nguy hiểm" từ Server (do Camera AI gửi về).
-* **Chấm công:** Check-in/Check-out ca làm việc, xác thực vị trí (GPS).
-* **Minh bạch thu nhập:**
-    * Xem bảng lương tạm tính theo thời gian thực.
-    * Xem lịch sử vi phạm và bằng chứng hình ảnh.
-    * Gửi khiếu nại nếu bị phạt sai.
+```yaml
+dependencies:
+  flutter_riverpod: ^2.4.0        # State management
+  dio: ^5.3.3                      # HTTP client
+  web_socket_channel: ^2.4.0      # WebSocket
+  firebase_messaging: ^14.6.9     # FCM push notification
+  geolocator: ^10.1.0             # GPS tracking
+  vibration: ^1.8.3               # Rung cảnh báo
+  audioplayers: ^5.2.0            # Phát âm thanh
+  permission_handler: ^11.0.1     # Request permissions
+  flutter_local_notifications: ^16.1.0  # Local notifications
+  cached_network_image: ^3.3.0    # Cache images
+  intl: ^0.18.1                   # Date formatting
+  flutter_dotenv: ^5.1.0          # Environment variables
+```
 
----
+## 🚀 Setup & Run
 
-## 🛠️ Tech Stack
+### 1. Install dependencies
+```bash
+flutter pub get
+```
 
-* **Hardware:** Camera AI (Edge Processing), Arduino (Sensors/GPS).
-* **Backend:** Python, Django, Django REST Framework, Channels (WebSocket), PostgreSQL/MySQL, Redis.
-* **Frontend:** ReactJS, Redux, Ant Design/Material UI, Leaflet/Google Maps API.
-* **Mobile:** React Native (hoặc Flutter), Firebase Cloud Messaging (FCM).
+### 2. Configure Firebase
+- Thêm `google-services.json` vào `android/app/`
+- Thêm `GoogleService-Info.plist` vào `ios/Runner/`
 
-## 🚀 Luồng Dữ Liệu Chính (Core Flow)
+### 3. Run app
+```bash
+# Android
+flutter run
 
-1.  **Phát hiện:** Camera AI phát hiện tài xế ngủ gật ➔ Gửi tín hiệu về Backend.
-2.  **Xử lý:** Backend ghi nhận lỗi, trừ điểm an toàn ➔ Bắn Socket.
-3.  **Cảnh báo:**
-    * **Web Admin:** Hiện Pop-up cảnh báo kèm ảnh.
-    * **Mobile App:** Rung và hú còi đánh thức tài xế.
+# iOS
+flutter run --release
+```
+
+## 📡 WebSocket Integration
+
+```dart
+// lib/services/websocket_service.dart
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+class WebSocketService {
+  late WebSocketChannel _channel;
+  
+  void connect(String driverId) {
+    _channel = WebSocketChannel.connect(
+      Uri.parse('ws://api.roadsentinel.com/ws/driver/$driverId/'),
+    );
+    
+    _channel.stream.listen((message) {
+      // Parse JSON message
+      final alert = Alert.fromJson(jsonDecode(message));
+      
+      if (alert.type == 'DANGER') {
+        _triggerAlert(alert);
+      }
+    });
+  }
+  
+  void _triggerAlert(Alert alert) {
+    // Rung mạnh
+    Vibration.vibrate(duration: 2000, pattern: [500, 1000, 500, 1000]);
+    
+    // Phát âm thanh
+    final player = AudioPlayer();
+    player.play(AssetSource('sounds/alert_sound.mp3'));
+    
+    // Hiển thị Alert Dialog
+    // ...
+  }
+}
+```
+
+## 🔔 Firebase Cloud Messaging (FCM)
+
+### Android Setup (`android/app/build.gradle`)
+```gradle
+dependencies {
+    implementation 'com.google.firebase:firebase-messaging:23.2.1'
+}
+```
+
+### Flutter Code
+```dart
+// lib/services/notification_service.dart
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+class NotificationService {
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  
+  Future<void> init() async {
+    // Request permission
+    await _fcm.requestPermission();
+    
+    // Get FCM token
+    String? token = await _fcm.getToken();
+    print('FCM Token: $token');
+    
+    // Send token to backend
+    await ApiService().updateFcmToken(token);
+    
+    // Listen for messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Nhận được cảnh báo: ${message.notification?.title}');
+      _triggerAlert(message.data);
+    });
+  }
+}
+```
+
+## 📱 Permissions Required
+
+### Android (`android/app/src/main/AndroidManifest.xml`)
+```xml
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.VIBRATE"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+```
+
+### iOS (`ios/Runner/Info.plist`)
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Cần truy cập vị trí để chấm công và tracking</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>Cần truy cập vị trí để tracking khi chạy xe</string>
+```
+
+## 🎨 UI/UX Features
+- **Material Design 3:** Modern UI
+- **Dark Mode:** Hỗ trợ chế độ tối
+- **Splash Screen:** Logo công ty
+- **Bottom Navigation Bar:** Điều hướng chính
+- **Pull to Refresh:** Cập nhật dữ liệu
+
+## 🔐 Security
+- Lưu JWT token trong Secure Storage
+- HTTPS only
+- Certificate pinning (production)
